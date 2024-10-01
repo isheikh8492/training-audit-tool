@@ -1,5 +1,6 @@
 from data_loader import load_training_data
 from tasks.task1 import list_completed_trainings
+from tasks.task2 import list_user_trained_in_fiscal_year
 
 if __name__ == '__main__':
     data = load_training_data("data/trainings.txt")
@@ -11,4 +12,5 @@ if __name__ == '__main__':
     # Task 2: List all people that completed that training in the specified fiscal year.
     training = trainings = ["Electrical Safety for Labs", "X-Ray Safety", "Laboratory Safety Training"]
     fiscal_year = 2024
-    # users = list_user_trained_in_fiscal_year(data, training, fiscal_year)
+    users_per_training = list_user_trained_in_fiscal_year(data, training, fiscal_year)
+    print(users_per_training)
