@@ -9,20 +9,25 @@ def find_people_with_expiring_trainings(data, reference_date):
 
     for user_completions in data:
         user = user_completions["name"]
-        completions = user_completions["completions"]
+        latest_trainings = {}
 
+        for completion in user_completions["completions"]:
+            if completion["expires"] is not None:
+                completion_date = datetime.strptime(completion["timestamp"], "%m/%d/%Y").date()
+                expiration_date = datetime.strptime(completion["expires"], "%m/%d/%Y").date()
+
+                if completion["name"] not in latest_trainings \
+                        or completion_date > latest_trainings[completion["name"]]["completion_date"]:
+                    latest_trainings[completion["name"]] = {
+                        "completion_date": completion_date,
+                        "expiration_date": expiration_date
+                    }
         expiring_trainings = []
-        for i in range(len(completions)):
-            if completions[i]["expires"] is not None:
-                expiration_date = datetime.strptime(completions[i]["expires"], "%m/%d/%Y").date()
-                if reference_date > expiration_date:
-                    expiring_trainings.append(
-                        {"name": completions[i]["name"],
-                         "status": "Expired"})
-                elif reference_date <= expiration_date <= expiring_soon_threshold:
-                    expiring_trainings.append(
-                        {"name": completions[i]["name"],
-                         "status": "Expiring Soon"})
+        for training_name, training_info in latest_trainings.items():
+            if reference_date > training_info["expiration_date"]:
+                expiring_trainings.append({"name": training_name, "status": "Expired"})
+            elif reference_date <= training_info["expiration_date"] <= expiring_soon_threshold:
+                expiring_trainings.append({"name": training_name, "status": "Expiring Soon"})
 
         if expiring_trainings:
             users_expiring_training[user] = expiring_trainings
